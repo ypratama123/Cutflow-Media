@@ -71,10 +71,10 @@
 <div align="center">
 
 ### 🖥️ **Desktop Experience**
-![Desktop Preview](https://via.placeholder.com/800x450/1E293B/EC4899?text=Desktop+Preview+Coming+Soon)
+![Desktop Preview](https://i.imgur.com/koCdb53.png)
 
 ### 📱 **Mobile Experience**  
-![Mobile Preview](https://via.placeholder.com/300x600/1E293B/06B6D4?text=Mobile+Preview+Coming+Soon)
+![Mobile Preview](https://i.imgur.com/krsjRAh.png)
 
 </div>
 
