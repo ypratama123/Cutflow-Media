@@ -9,16 +9,16 @@ const Hero = () => {
   };
 
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+    <section id="home" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden w-full">
       {/* Animated particles */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden w-full">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
             className="absolute w-2 h-2 bg-gradient-to-r from-pink-600 to-cyan-600 rounded-full"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 95}%`, // Reduced from 100% to 95% to prevent overflow
+              top: `${Math.random() * 95}%`,  // Reduced from 100% to 95% to prevent overflow
               animation: `particle-float ${3 + Math.random() * 4}s ease-in-out infinite`,
               animationDelay: `${Math.random() * 5}s`,
             }}
@@ -26,13 +26,13 @@ const Hero = () => {
         ))}
       </div>
       
-      {/* Background Animation - now handled by parent */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-pink-600 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-cyan-600 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
+      {/* Background Animation */}
+      <div className="absolute inset-0 opacity-10 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 md:w-96 md:h-96 bg-pink-600 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+        <div className="absolute top-1/3 right-1/4 w-80 h-80 md:w-96 md:h-96 bg-cyan-600 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
       </div>
 
-      <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+      <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
