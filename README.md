@@ -74,7 +74,7 @@
 ![Desktop Preview](https://i.imgur.com/koCdb53.png)
 
 ### 📱 **Mobile Experience**  
-![Mobile Preview](https://i.imgur.com/krsjRAh.png)
+![Mobile Preview](https://i.imgur.com/VTH0OFp.png)
 
 </div>
 
