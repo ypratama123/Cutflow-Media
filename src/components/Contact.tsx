@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, Clock, Instagram, Twitter, Linkedin, Send } from 'lucide-react';
-import emailjs from '@emailjs/browser';
+import { contactService } from '../services/contactService';
 
 interface FormData {
   name: string;
@@ -69,27 +69,22 @@ const Contact = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
 
     try {
-      // EmailJS configuration - you'll need to set these up
-      await emailjs.send(
-        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
-        {
-          from_name: formData.name,
-          from_email: formData.email,
-          phone: formData.phone,
-          company: formData.company,
-          project_type: formData.projectType,
-          message: formData.message,
-          budget: formData.budget,
-        },
-        'YOUR_PUBLIC_KEY' // Replace with your EmailJS public key
-      );
+      await contactService.submitContact({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        company: formData.company || null,
+        project_type: formData.projectType || null,
+        budget_range: formData.budget || null,
+        message: formData.message,
+        status: 'new'
+      });
 
       setIsSuccess(true);
       setFormData({
@@ -102,8 +97,8 @@ const Contact = () => {
         budget: ''
       });
     } catch (error) {
-      console.error('Error sending email:', error);
-      alert('Terjadi kesalahan. Silakan coba lagi atau hubungi kami langsung.');
+      console.error('Error sending message:', error);
+      alert('Terjadi kesalahan saat mengirim pesan. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +110,7 @@ const Contact = () => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({
@@ -191,9 +186,8 @@ const Contact = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 bg-slate-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-600 ${
-                      errors.name ? 'border-red-500' : 'border-slate-600'
-                    }`}
+                    className={`w-full px-4 py-3 bg-slate-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-600 ${errors.name ? 'border-red-500' : 'border-slate-600'
+                      }`}
                     placeholder="Nama lengkap"
                   />
                   {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
@@ -208,9 +202,8 @@ const Contact = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 bg-slate-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-600 ${
-                      errors.email ? 'border-red-500' : 'border-slate-600'
-                    }`}
+                    className={`w-full px-4 py-3 bg-slate-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-600 ${errors.email ? 'border-red-500' : 'border-slate-600'
+                      }`}
                     placeholder="email@example.com"
                   />
                   {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
@@ -292,9 +285,8 @@ const Contact = () => {
                   value={formData.message}
                   onChange={handleChange}
                   rows={5}
-                  className={`w-full px-4 py-3 bg-slate-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-600 resize-none ${
-                    errors.message ? 'border-red-500' : 'border-slate-600'
-                  }`}
+                  className={`w-full px-4 py-3 bg-slate-700 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-pink-600 resize-none ${errors.message ? 'border-red-500' : 'border-slate-600'
+                    }`}
                   placeholder="Ceritakan tentang project Anda..."
                 />
                 {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
@@ -320,7 +312,7 @@ const Contact = () => {
           >
             <div className="bg-slate-800/50 backdrop-blur-sm p-8 rounded-xl border border-slate-700">
               <h3 className="text-2xl font-bold text-white mb-6">Get in Touch</h3>
-              
+
               <div className="space-y-6">
                 <div className="flex items-center">
                   <Mail className="text-pink-600 mr-4" size={24} />
@@ -367,7 +359,7 @@ const Contact = () => {
             <div className="bg-gradient-to-r from-pink-600/20 to-cyan-600/20 p-6 rounded-xl border border-pink-600/30">
               <h4 className="text-white font-semibold mb-2">Quick Response Guarantee</h4>
               <p className="text-gray-300 text-sm">
-                Kami berkomitmen merespons setiap inquiry dalam 24 jam. 
+                Kami berkomitmen merespons setiap inquiry dalam 24 jam.
                 Untuk urgent project, hubungi langsung via WhatsApp.
               </p>
             </div>

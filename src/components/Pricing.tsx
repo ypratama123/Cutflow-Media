@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Pricing = () => {
   const plans = [
@@ -21,8 +22,8 @@ const Pricing = () => {
       popular: false
     },
     {
-      name: "PROFESSIONAL",
-      price: "Rp 1.500.000",
+      name: "GROWTH",
+      price: "Rp 900.000",
       period: "/bulan",
       clips: "30 clips/bulan",
       turnaround: "2-3 hari kerja",
@@ -36,13 +37,13 @@ const Pricing = () => {
         "Dashboard access"
       ],
       buttonText: "Pilih Paket",
-      buttonStyle: "btn-primary",
+      buttonStyle: "btn-secondary",
       popular: true
     },
     {
-      name: "ENTERPRISE",
-      price: "Custom",
-      period: "",
+      name: "PRO",
+      price: "Rp 1.500.000",
+      period: "/bulan",
       clips: "Unlimited clips",
       turnaround: "1-2 hari kerja",
       revisions: "Unlimited revision",
@@ -54,7 +55,7 @@ const Pricing = () => {
         "24/7 support",
         "Custom SLA"
       ],
-      buttonText: "Hubungi Kami",
+      buttonText: "Pilih Paket",
       buttonStyle: "btn-secondary",
       popular: false
     }
@@ -93,11 +94,10 @@ const Pricing = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
               viewport={{ once: true }}
-              className={`relative bg-slate-800/50 backdrop-blur-sm p-8 rounded-xl border ${
-                plan.popular 
-                  ? 'border-pink-600 shadow-2xl shadow-pink-600/20 scale-105' 
-                  : 'border-slate-700'
-              } card-hover`}
+              className={`relative bg-slate-800/50 backdrop-blur-sm p-8 rounded-xl border ${plan.popular
+                ? 'border-pink-600 shadow-2xl shadow-pink-600/20 scale-105'
+                : 'border-slate-700'
+                } card-hover`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -129,12 +129,12 @@ const Pricing = () => {
                 ))}
               </ul>
 
-              <button
-                onClick={scrollToContact}
-                className={`w-full ${plan.buttonStyle} text-center`}
+              <Link
+                to={`/dashboard/checkout?pkg=${plan.name.toLowerCase()}`}
+                className={`w-full ${plan.buttonStyle} inline-block text-center py-3 rounded-lg font-semibold transition-all duration-300`}
               >
                 {plan.buttonText}
-              </button>
+              </Link>
             </motion.div>
           ))}
         </div>
