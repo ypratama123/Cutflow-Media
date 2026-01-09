@@ -14,7 +14,7 @@ export const userService = {
     },
 
     async updateUserRole(userId: string, role: 'customer' | 'admin') {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
             .from('profiles')
             .update({ role })
             .eq('id', userId);

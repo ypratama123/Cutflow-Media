@@ -1,8 +1,8 @@
 import { supabase } from '../lib/supabase';
 import type { Database } from '../types/database.types';
 
-type Project = Database['public']['Tables']['projects']['Row'];
-type ProjectFile = Database['public']['Tables']['project_files']['Row'];
+export type Project = Database['public']['Tables']['projects']['Row'];
+export type ProjectFile = Database['public']['Tables']['project_files']['Row'];
 
 export const projectService = {
     // Customer: Get My Projects
