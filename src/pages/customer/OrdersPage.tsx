@@ -27,7 +27,7 @@ export default function CustomerOrdersPage() {
                 setOrders(data as any || []);
 
                 // [NEW] Smart Sync: Check pending orders against Midtrans
-                const pendingOrders = data.filter((o: any) => o.payment_status === 'pending' || o.payment_status === 'unpaid');
+                const pendingOrders = (data as any[]).filter((o: any) => o.payment_status === 'pending' || o.payment_status === 'unpaid');
                 if (pendingOrders.length > 0) {
                     console.log(`Syncing ${pendingOrders.length} pending orders...`);
 
@@ -95,7 +95,7 @@ export default function CustomerOrdersPage() {
     };
 
     // Need auth profile for payment details
-    const { profile, user } = useAuth(); // Import useAuth at module top level if not exists
+    const { user } = useAuth(); // Import useAuth at module top level if not exists
 
     const handleRetryPayment = async (order: Order) => {
         try {

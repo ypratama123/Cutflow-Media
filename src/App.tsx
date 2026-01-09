@@ -35,18 +35,7 @@ import TicketDetailPage from './pages/customer/TicketDetailPage';
 
 import { AnimatePresence } from 'framer-motion';
 
-function ComingSoonPage({ title }: { title: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center h-[60vh] text-center">
-      <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-cyan-500 bg-clip-text text-transparent mb-4">
-        {title}
-      </h2>
-      <p className="text-gray-400 text-lg">
-        Fitur ini sedang dalam pengembangan 🚀
-      </p>
-    </div>
-  );
-}
+
 
 function App() {
   const location = useLocation();
