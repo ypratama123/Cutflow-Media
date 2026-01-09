@@ -12,11 +12,11 @@ import {
     LogOut,
     Menu,
     X,
-    Bell,
     ChevronDown,
     Package,
 } from 'lucide-react';
 import { useAuth } from '../../features/auth/AuthContext';
+import NotificationDropdown from './NotificationDropdown';
 
 const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -170,10 +170,7 @@ export default function AdminLayout() {
                         {/* Right side */}
                         <div className="flex items-center gap-4">
                             {/* Notifications */}
-                            <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
-                                <Bell size={20} />
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full" />
-                            </button>
+                            <NotificationDropdown />
 
                             {/* User menu */}
                             <div className="relative">

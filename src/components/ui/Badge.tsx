@@ -2,9 +2,10 @@ interface BadgeProps {
     children: React.ReactNode;
     variant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
     size?: 'sm' | 'md';
+    icon?: React.ElementType; // Add optional icon prop
 }
 
-export default function Badge({ children, variant = 'default', size = 'md' }: BadgeProps) {
+export default function Badge({ children, variant = 'default', size = 'md', icon: Icon }: BadgeProps) {
     const variantClasses = {
         default: 'bg-slate-700 text-gray-300',
         success: 'bg-green-500/20 text-green-400 border border-green-500/30',
@@ -21,11 +22,12 @@ export default function Badge({ children, variant = 'default', size = 'md' }: Ba
     return (
         <span
             className={`
-        inline-flex items-center font-medium rounded-full
+        inline-flex items-center gap-1.5 font-medium rounded-full
         ${variantClasses[variant]}
         ${sizeClasses[size]}
       `}
         >
+            {Icon && <Icon size={size === 'sm' ? 12 : 14} />}
             {children}
         </span>
     );

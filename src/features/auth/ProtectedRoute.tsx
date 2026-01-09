@@ -12,16 +12,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
     const location = useLocation();
 
     // Debugging akses
-    if (!loading) {
-        console.log('🛡️ ProtectedRoute Check:', {
-            path: location.pathname,
-            user: user?.email,
-            role: profile?.role,
-            requireAdmin,
-            isAdmin,
-            granted: requireAdmin ? isAdmin : true
-        });
-    }
+
 
     if (loading) {
         return (

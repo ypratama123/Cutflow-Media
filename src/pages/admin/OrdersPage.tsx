@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Filter, Search, Eye, Edit, CheckCircle, Loader } from 'lucide-react';
+import { ShoppingCart, Filter, Search, Eye, Edit, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -45,6 +45,17 @@ export default function AdminOrdersPage() {
         };
         const { label, variant } = statusMap[status] || { label: status, variant: 'info' as const };
         return <Badge variant={variant}>{label}</Badge>;
+    };
+
+    const getPaymentBadge = (status: string) => {
+        const statusMap: Record<string, { label: string; variant: 'success' | 'warning' | 'danger' }> = {
+            paid: { label: 'Lunas', variant: 'success' },
+            unpaid: { label: 'Belum Bayar', variant: 'danger' },
+            pending: { label: 'Verifikasi', variant: 'warning' },
+            failed: { label: 'Gagal', variant: 'danger' },
+        };
+        const { label, variant } = statusMap[status] || { label: status, variant: 'warning' as const };
+        return <Badge variant={variant} size="sm">{label}</Badge>;
     };
 
     const formatCurrency = (amount: number) => {
@@ -150,6 +161,7 @@ export default function AdminOrdersPage() {
                                             <th className="text-left py-4 px-4 text-gray-400 font-medium text-sm">Customer</th>
                                             <th className="text-left py-4 px-4 text-gray-400 font-medium text-sm">Paket</th>
                                             <th className="text-left py-4 px-4 text-gray-400 font-medium text-sm">Status</th>
+                                            <th className="text-left py-4 px-4 text-gray-400 font-medium text-sm">Pembayaran</th>
                                             <th className="text-right py-4 px-4 text-gray-400 font-medium text-sm">Total</th>
                                             <th className="text-center py-4 px-4 text-gray-400 font-medium text-sm">Aksi</th>
                                         </tr>
@@ -171,6 +183,7 @@ export default function AdminOrdersPage() {
                                                 </td>
                                                 <td className="py-4 px-4 text-gray-300">{order.packages?.name || 'Deleted'}</td>
                                                 <td className="py-4 px-4">{getStatusBadge(order.status)}</td>
+                                                <td className="py-4 px-4">{getPaymentBadge(order.payment_status)}</td>
                                                 <td className="py-4 px-4 text-right text-white font-medium">
                                                     {formatCurrency(order.amount)}
                                                 </td>

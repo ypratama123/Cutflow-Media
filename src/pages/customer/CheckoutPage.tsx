@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, AlertCircle, Loader } from 'lucide-react';
+import { ArrowLeft, Check, AlertCircle, Loader, CreditCard } from 'lucide-react';
 import { packageService } from '../../services/packageService';
 import { orderService } from '../../services/orderService';
+import { paymentService } from '../../services/paymentService'; // New Payment Service
+import { useAuth } from '../../features/auth/AuthContext'; // Need User Info
 import Button from '../../components/ui/Button';
 import type { Database } from '../../types/database.types';
 
@@ -12,6 +14,7 @@ type Package = Database['public']['Tables']['packages']['Row'];
 export default function CheckoutPage() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { profile, user } = useAuth(); // Get user details
     const packageSlug = searchParams.get('pkg');
 
     const [pkg, setPkg] = useState<Package | null>(null);
@@ -45,23 +48,87 @@ export default function CheckoutPage() {
         fetchPackage();
     }, [packageSlug, navigate]);
 
-    const handleCheckout = async () => {
-        if (!pkg) return;
+    const handlePayment = async () => {
+        if (!pkg || !user) return;
 
         setSubmitting(true);
+        setError('');
+
         try {
-            await orderService.createOrder({
+            // 1. Create Order in Database first (Pending/Unpaid)
+            const order = await orderService.createOrder({
                 package_id: pkg.id,
                 amount: pkg.price,
                 notes: notes
             });
 
-            // Redirect to orders page on success
-            navigate('/dashboard/orders', { state: { successOrder: true } });
-        } catch (err) {
+            // 2. Request Payment Token from Backend
+            const transaction = await paymentService.createTransaction({
+                orderId: order.id, // Use Supabase UUID directly
+                amount: pkg.price,
+                customerDetails: {
+                    firstName: profile?.full_name || 'Customer',
+                    email: user.email || '',
+                    phone: profile?.phone || '08123456789'
+                }
+            });
+
+            // 2b. IMMEDIATELY Save the secure Unique ID to Database
+            if (transaction.order_id) {
+                try {
+                    console.log("Saving Midtrans ID:", transaction.order_id);
+                    await paymentService.updateMidtransId(order.id, transaction.order_id);
+                } catch (saveErr: any) {
+                    console.error("Failed to save Midtrans ID", saveErr);
+                    // Silent fail is dangerous, but we alert user if critical
+                    // alert("Peringatan: Gagal menyimpan ID Transaksi. Mohon simpan bukti pembayaran Anda.");
+                }
+            }
+
+            // 3. Open Midtrans Snap Popup
+            if (window.snap) {
+                window.snap.pay(transaction.token, {
+                    onSuccess: async function (result: any) {
+                        console.log('Payment success', result);
+
+                        // [Safety Net] Ensure DB has correct Midtrans ID if it differs
+                        // PRIORITY: Use TRANSACTION_ID if available
+                        const bestId = result.transaction_id || result.order_id;
+
+                        if (bestId) {
+                            try {
+                                await paymentService.updateMidtransId(order.id, bestId);
+                            } catch (e) {
+                                console.error("Post-payment ID sync failed", e);
+                            }
+                        }
+
+                        // Auto update status on frontend success
+                        await paymentService.handleSuccess(order.id);
+                        navigate('/dashboard/orders', { state: { successOrder: true } });
+                    },
+                    onPending: function (result: any) {
+                        console.log('Payment pending', result);
+                        navigate('/dashboard/orders');
+                    },
+                    onError: function (result: any) {
+                        console.error('Payment error', result);
+                        setError('Pembayaran gagal atau dibatalkan.');
+                        setSubmitting(false);
+                    },
+                    onClose: function () {
+                        console.log('Customer closed the popup without finishing the payment');
+                        setSubmitting(false);
+                    }
+                });
+            } else {
+                setError('Sistem pembayaran gagal dimuat. Silakan muat ulang halaman.');
+                setSubmitting(false);
+            }
+
+        } catch (err: any) {
             console.error(err);
-            setError('Gagal memproses pesanan. Silakan coba lagi.');
-        } finally {
+            setError(err.message || 'Gagal memproses transaksi. Mohon pastikan server backend berjalan (hubungi admin jika berlanjut).');
             setSubmitting(false);
         }
     };
@@ -145,11 +212,16 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-                        <h2 className="text-xl font-bold text-white mb-4">Modul Pembayaran</h2>
+                        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <CreditCard size={20} className="text-cyan-500" />
+                            Metode Pembayaran
+                        </h2>
                         <div className="p-4 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
-                            <p className="text-cyan-400 text-sm">
-                                ℹ️ Sistem pembayaran otomatis (Midtrans) sedang dalam proses verifikasi.
-                                Instruksi pembayaran manual akan ditampilkan setelah Anda membuat pesanan.
+                            <p className="text-cyan-100 text-sm font-medium mb-1">
+                                Midtrans Secure Payment
+                            </p>
+                            <p className="text-cyan-400/80 text-xs">
+                                Mendukung QRIS, GoPay, Transfer Bank (BCA, Mandiri, BNI, BRI), dan Kartu Kredit.
                             </p>
                         </div>
                     </div>
@@ -181,16 +253,22 @@ export default function CheckoutPage() {
                         </div>
 
                         <Button
-                            onClick={handleCheckout}
+                            onClick={handlePayment}
                             loading={submitting}
-                            className="w-full"
+                            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                             size="lg"
                         >
-                            Buat Pesanan
+                            Bayar Sekarang
                         </Button>
 
+                        {error && (
+                            <p className="text-red-400 text-xs text-center mt-3 bg-red-500/10 p-2 rounded border border-red-500/20">
+                                {error}
+                            </p>
+                        )}
+
                         <p className="text-xs text-center text-gray-500 mt-4">
-                            Dengan membuat pesanan, Anda menyetujui syarat & ketentuan layanan kami.
+                            Transaksi Anda diamankan oleh Midtrans
                         </p>
                     </div>
                 </div>

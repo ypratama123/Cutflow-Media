@@ -7,12 +7,20 @@ import AdminLayout from './components/layout/AdminLayout';
 import CustomerLayout from './components/layout/CustomerLayout';
 
 // Admin Pages
+// Admin Pages
 import AdminDashboardPage from './pages/admin/DashboardPage';
 import AdminOrdersPage from './pages/admin/OrdersPage';
 import AdminOrderDetailPage from './pages/admin/OrderDetailPage';
 import AdminUsersPage from './pages/admin/UsersPage';
 import AdminPackagesPage from './pages/admin/PackagesPage';
 import AdminLeadsPage from './pages/admin/LeadsPage';
+import AdminAnalyticsPage from './pages/admin/AnalyticsPage';
+import AdminContentPage from './pages/admin/ContentPage';
+import AdminSettingsPage from './pages/admin/SettingsPage';
+
+// ...
+
+
 
 // Customer Pages
 import CustomerDashboardPage from './pages/customer/DashboardPage';
@@ -22,6 +30,8 @@ import CustomerCheckoutPage from './pages/customer/CheckoutPage';
 import CustomerProfilePage from './pages/customer/ProfilePage';
 import CustomerProjectsPage from './pages/customer/ProjectsPage';
 import CustomerProjectDetailPage from './pages/customer/ProjectDetailPage';
+import MessagesPage from './pages/customer/MessagesPage';
+import TicketDetailPage from './pages/customer/TicketDetailPage';
 
 import { AnimatePresence } from 'framer-motion';
 
@@ -61,7 +71,10 @@ function App() {
           <Route path="projects" element={<CustomerProjectsPage />} />
           <Route path="projects/:id" element={<CustomerProjectDetailPage />} />
 
-          <Route path="messages" element={<ComingSoonPage title="Pesan" />} />
+
+          {/* Messages */}
+          <Route path="messages" element={<MessagesPage />} />
+          <Route path="messages/:id" element={<TicketDetailPage />} />
         </Route>
 
         {/* Admin Routes */}
@@ -74,9 +87,9 @@ function App() {
 
           {/* Other Routes */}
           <Route path="leads" element={<AdminLeadsPage />} />
-          <Route path="content" element={<ComingSoonPage title="Kelola Konten" />} />
-          <Route path="analytics" element={<ComingSoonPage title="Analytics" />} />
-          <Route path="settings" element={<ComingSoonPage title="Pengaturan" />} />
+          <Route path="content" element={<AdminContentPage />} />
+          <Route path="analytics" element={<AdminAnalyticsPage />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
         </Route>
       </Routes>
     </AnimatePresence>

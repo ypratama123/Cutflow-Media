@@ -69,3 +69,10 @@ $RECYCLE.BIN/
 
 # Vite
 *.tsbuildinfo
+
+# Project specific scripts
+scripts/debug/
+scripts/sql/
+
+# Vercel
+.vercel

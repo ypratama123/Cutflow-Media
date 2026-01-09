@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Filter, Search, MoreVertical, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../features/auth/AuthContext'; // Add useAuth import
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import { orderService } from '../../services/orderService';
+import { paymentService } from '../../services/paymentService'; // Add Import
 import type { Database } from '../../types/database.types';
 
 type Order = Database['public']['Tables']['orders']['Row'] & {
@@ -23,6 +25,26 @@ export default function CustomerOrdersPage() {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const data = await orderService.getMyOrders();
                 setOrders(data as any || []);
+
+                // [NEW] Smart Sync: Check pending orders against Midtrans
+                const pendingOrders = data.filter((o: any) => o.payment_status === 'pending' || o.payment_status === 'unpaid');
+                if (pendingOrders.length > 0) {
+                    console.log(`Syncing ${pendingOrders.length} pending orders...`);
+
+                    for (const order of pendingOrders) {
+                        try {
+                            await paymentService.syncOrderStatus(order.id);
+                        } catch (e) {
+                            console.error("Sync failed for", order.id, e);
+                        }
+                    }
+
+                    // Refresh data after sync to show updated status
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const syncedData = await orderService.getMyOrders();
+                    setOrders(syncedData as any || []);
+                }
+
             } catch (error) {
                 console.error("Failed to fetch orders:", error);
             } finally {
@@ -70,6 +92,67 @@ export default function CustomerOrdersPage() {
             month: 'long',
             year: 'numeric'
         });
+    };
+
+    // Need auth profile for payment details
+    const { profile, user } = useAuth(); // Import useAuth at module top level if not exists
+
+    const handleRetryPayment = async (order: Order) => {
+        try {
+            // 1. Request token (Server will generate unique ID)
+            const transaction = await paymentService.createTransaction({
+                orderId: order.id,
+                amount: order.amount,
+                customerDetails: {
+                    firstName: user?.user_metadata?.full_name || 'Customer',
+                    email: user?.email || '',
+                    phone: user?.phone || '08123456789'
+                }
+            });
+
+            // 2. IMPORTANT: Save the SERVER-GENERATED midtrans_id to Supabase
+            // This guarantees we are tracking the exact ID that Midtrans knows about
+            if (transaction.order_id) {
+                await paymentService.updateMidtransId(order.id, transaction.order_id);
+            }
+
+            if (window.snap) {
+                window.snap.pay(transaction.token, {
+                    onSuccess: async function (result: any) {
+                        console.log('Payment success', result);
+
+                        // [Safety Net] Ensure DB has the correct Midtrans ID from the result
+                        // PRIORITY: Use TRANSACTION_ID if available (e.g. DANA Simulator often uses this as primary ref)
+                        // Fallback to ORDER_ID
+                        const bestId = result.transaction_id || result.order_id;
+
+                        if (bestId) {
+                            console.log("Saving Best Midtrans ID:", bestId);
+                            try {
+                                await paymentService.updateMidtransId(order.id, bestId);
+                            } catch (e) {
+                                console.error("Post-payment ID sync failed", e);
+                            }
+                        }
+
+                        // Update status using the ORIGINAL Order ID (Database ID)
+                        await paymentService.handleSuccess(order.id);
+                        window.location.reload();
+                    },
+                    onPending: function (result: any) {
+                        console.log('Payment pending', result);
+                        window.location.reload();
+                    },
+                    onError: function (result: any) {
+                        console.error('Payment error', result);
+                        alert('Pembayaran gagal');
+                    }
+                });
+            }
+        } catch (error: any) {
+            console.error(error);
+            alert('Gagal memuat pembayaran: ' + error.message);
+        }
     };
 
     const filteredOrders = orders.filter(order =>
@@ -148,7 +231,16 @@ export default function CustomerOrdersPage() {
                                                 <td className="py-4 px-6 text-right text-white font-medium">
                                                     {formatCurrency(order.amount)}
                                                 </td>
-                                                <td className="py-4 px-6">
+                                                <td className="py-4 px-6 flex items-center gap-2">
+                                                    {(order.payment_status === 'unpaid' || order.payment_status === 'pending') && (
+                                                        <Button
+                                                            size="sm"
+                                                            className="bg-green-600 hover:bg-green-700 text-xs px-3 py-1 h-8"
+                                                            onClick={() => handleRetryPayment(order)}
+                                                        >
+                                                            Bayar
+                                                        </Button>
+                                                    )}
                                                     <Link to={`/dashboard/orders/${order.id}`}>
                                                         <button className="p-2 text-gray-400 hover:text-cyan-400 hover:bg-slate-700 rounded-lg transition-colors" title="Lihat Detail">
                                                             <MoreVertical size={18} />
