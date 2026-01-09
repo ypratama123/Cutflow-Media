@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../features/auth/AuthContext';
+import Button from './ui/Button';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -32,32 +36,48 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-      scrolled ? 'bg-slate-900/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
-    }`}>
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-slate-900/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <img 
-              src="https://i.imgur.com/y2qccQU.png" 
-              alt="CUTFLOW MEDIA Logo" 
-              className="h-10 w-auto"
+          <div className="flex-shrink-0 flex items-center">
+            <img
+              src="https://i.imgur.com/y2qccQU.png"
+              alt="CUTFLOW MEDIA Logo"
+              className="h-12 w-auto"
             />
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
+          <div className="hidden md:flex items-center gap-6">
+            <div className="flex items-baseline space-x-6">
               {menuItems.map((item) => (
                 <button
                   key={item.name}
                   onClick={() => scrollToSection(item.href)}
-                  className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium transition-colors duration-300"
+                  className="text-gray-300 hover:text-white text-sm font-medium transition-colors duration-300"
                 >
                   {item.name}
                 </button>
               ))}
+            </div>
+
+            <div className="pl-6 border-l border-slate-700 flex items-center gap-4">
+              {user ? (
+                <Link to="/dashboard">
+                  <Button size="sm" variant="primary">Dashboard</Button>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login" className="text-gray-300 hover:text-white font-medium text-sm">
+                    Masuk
+                  </Link>
+                  <Link to="/register">
+                    <Button size="sm" variant="outline">Daftar</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -86,6 +106,23 @@ const Navbar = () => {
                 {item.name}
               </button>
             ))}
+
+            <div className="pt-4 mt-2 border-t border-slate-700 flex flex-col gap-3 px-3">
+              {user ? (
+                <Link to="/dashboard" className="w-full">
+                  <Button className="w-full">Dashboard</Button>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login" className="text-gray-300 hover:text-white font-medium py-2 block">
+                    Masuk
+                  </Link>
+                  <Link to="/register" className="w-full">
+                    <Button className="w-full" variant="outline">Daftar</Button>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

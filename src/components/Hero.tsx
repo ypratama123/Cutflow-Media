@@ -33,19 +33,7 @@ const Hero = () => {
       </div>
 
       <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-6"
-        >
-          <img 
-            src="https://i.imgur.com/y2qccQU.png" 
-            alt="CUTFLOW MEDIA Logo" 
-            className="h-16 md:h-20 lg:h-24 w-auto mx-auto mb-6 floating-element"
-          />
-        </motion.div>
-
+       
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
