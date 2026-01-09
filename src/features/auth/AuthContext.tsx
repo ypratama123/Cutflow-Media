@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     .eq('id', data.user.id)
                     .single();
 
-                return { error: null, role: profileData?.role };
+                return { error: null, role: (profileData as any)?.role };
             }
 
             return { error: null };
